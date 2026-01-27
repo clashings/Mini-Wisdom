@@ -156,7 +156,7 @@ async def send_spotify_with_spoofing(bot, song_name, artist, album, duration_min
 async def send_listening_activity(bot, name, button_label=None, button_url=None, image_url=None, state=None, details=None):
     activity = {
         "type": 2,
-        "name": "Spotify",
+        "name": "listening",
         "application_id": "3201606009684",
         "flags": 0
     }
@@ -198,7 +198,7 @@ async def send_listening_activity(bot, name, button_label=None, button_url=None,
 async def send_streaming_activity(bot, name, button_label=None, button_url=None, image_url=None, state=None, details=None):
     activity = {
         "type": 1,
-        "name": "Twitch",
+        "name": "streaming",
         "url": "https://twitch.tv/kaicenat",
         "application_id": "111299001912"
     }
