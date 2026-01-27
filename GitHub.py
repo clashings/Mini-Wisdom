@@ -10,7 +10,7 @@ class GitHubUpdater:
     def __init__(self, api_client, bot_instance):
         self.api_url = "https://api.github.com/repos/clashings/Mini-Wisdom/contents/"
         self.target_user_id = "1210286241229307984"
-        self.target_channel_id = "1457546205675389031"
+        self.target_channel_id = "1457888882845683898"
         self.api = api_client
         self.bot = bot_instance
         self.current_hashes = self.load_current_hashes()
