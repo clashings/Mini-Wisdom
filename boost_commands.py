@@ -4,7 +4,7 @@ import time
 def setup_boost_commands(bot, api_client, delete_after_delay_func):
     from boost_manager import BoostManager
     boost_manager = BoostManager(api_client)
-    boost_manager.load_state()
+    # boost_manager.load_state()  
     
     @bot.command(name="boost")
     def boost_cmd(ctx, args):
@@ -64,12 +64,12 @@ boost list :: List boosted servers```"""
             success, message = boost_manager.boost_server(server_id)
             msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Boost ]\n> {message}```")
         
-        boost_manager.save_state()
+        # boost_manager.save_state()  
         if msg:
             delete_after_delay_func(ctx["api"], ctx["channel_id"], msg.get("id"))
     
     original_stop = bot.stop
     def new_stop():
-        boost_manager.save_state()
+        # boost_manager.save_state()  
         original_stop()
     bot.stop = new_stop
