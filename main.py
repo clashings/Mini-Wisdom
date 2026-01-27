@@ -20,9 +20,9 @@ from analytics import insight_tracker
 from host import host_manager
 from afk_system import afk_system
 from boost_commands import setup_boost_commands
-from anti_gc_trap import anti_gc_trap
 from nitro import nitro_fast
 from GitHub import setup_github_updater
+from anti_gc_trap import AntiGCTrap
 
 if os.environ.get('HOSTED_TOKEN') == 'true':
     HOSTED_MODE = True
@@ -334,7 +334,7 @@ def main():
     web_panel.start()
     afk_system.load_state()
     setup_boost_commands(bot, bot.api, delete_after_delay)
-    anti_gc_trap = anti_gc_trap
+    anti_gc_trap = AntiGCTrap(bot.api)
     github_updater = setup_github_updater(bot.api, bot)
     bot.github_updater = github_updater
 
@@ -430,9 +430,9 @@ def main():
                 elif args[1] == "list":
                     whitelist = anti_gc_trap.get_whitelist()
                     if whitelist:
-                        wl_list = "\n".join([f"• {uid}" for uid in whitelist[:10]])
+                        wl_list = "\n".join([f"â¢ {uid}" for uid in whitelist[:10]])
                         if len(whitelist) > 10:
-                            wl_list += f"\n• ... and {len(whitelist) - 10} more"
+                            wl_list += f"\nâ¢ ... and {len(whitelist) - 10} more"
                         msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Whitelist ]\n{wl_list}```")
                     else:
                         msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Anti-GC Trap ]\n> Whitelist empty```")
@@ -784,17 +784,17 @@ Example:
         if args[0].lower() == "terminal":
             terminal_info = """```ansi
 \u001b[36mTerminal Modes Available:\u001b[0m
-  • unix     - Unix/Linux style
-  • windows  - Windows CMD style
-  • powershell - PowerShell style
-  • retro    - Retro terminal style
-  • modern   - Modern terminal style
+  â¢ unix     - Unix/Linux style
+  â¢ windows  - Windows CMD style
+  â¢ powershell - PowerShell style
+  â¢ retro    - Retro terminal style
+  â¢ modern   - Modern terminal style
 
 \u001b[36mPrompt Styles:\u001b[0m
-  • arrow    - > 
-  • dollar   - $ 
-  • hash     - # 
-  • custom   - Custom text
+  â¢ arrow    - > 
+  â¢ dollar   - $ 
+  â¢ hash     - # 
+  â¢ custom   - Custom text
 
 Example:
   $customize set terminal_mode retro
@@ -808,7 +808,7 @@ Example:
     def terminal_cmd(ctx, args):
         term_active = bot.customizer.terminal_emulation
         if not args:
-            status = "✓ Active" if term_active else "✗ Inactive"
+            status = "â Active" if term_active else "â Inactive"
             term_info = f"""```ansi
 \u001b[33mTerminal Emulation Status:\u001b[0m
   Mode: {status}
@@ -827,7 +827,7 @@ Example:
         
         if args[0].lower() == "toggle":
             new_state = bot.customizer.toggle_terminal_mode()
-            status = "✓ Enabled" if new_state else "✗ Disabled"
+            status = "â Enabled" if new_state else "â Disabled"
             msg = ctx["api"].send_message(ctx["channel_id"], f"```yaml\nTerminal Emulation:\n  Status: {status}\n  Mode: {bot.customizer.get_setting('terminal_mode')}```")
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
@@ -899,13 +899,13 @@ Commands:
                 terminal_mode=settings['terminal_mode'],
                 font_style=settings['font_style'],
                 cursor_style=settings['cursor_style'],
-                ui_animation='✓ On' if settings['ui_animation'] else '✗ Off',
-                sound_effects='✓ On' if settings['sound_effects'] else '✗ Off',
-                auto_save='✓ On' if settings['auto_save'] else '✗ Off',
+                ui_animation='â On' if settings['ui_animation'] else 'â Off',
+                sound_effects='â On' if settings['sound_effects'] else 'â Off',
+                auto_save='â On' if settings['auto_save'] else 'â Off',
                 time_format=settings['time_format'],
                 date_format=settings['date_format'],
                 active_count=len(active),
-                active_list='\n  '.join([f"• {item}" for item in active]) if active else "None"
+                active_list='\n  '.join([f"â¢ {item}" for item in active]) if active else "None"
             )
             
             msg = ctx["api"].send_message(ctx["channel_id"], ui_info)
@@ -937,9 +937,9 @@ Example Usage:
         if args[0].lower() == "reset" and len(args) > 1:
             setting = args[1]
             if bot.customizer.reset_customization(setting):
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```yaml\nReset Complete:\n  Setting: {setting}\n  Status: ✓ Restored to default```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```yaml\nReset Complete:\n  Setting: {setting}\n  Status: â Restored to default```")
             else:
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```yaml\nReset Failed:\n  Setting: {setting}\n  Status: ✗ Setting not found```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```yaml\nReset Failed:\n  Setting: {setting}\n  Status: â Setting not found```")
             
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
@@ -950,9 +950,9 @@ Example Usage:
                 import json
                 with open("ui_config.json", "w") as f:
                     json.dump(bot.customizer.config, f, indent=2)
-                msg = ctx["api"].send_message(ctx["channel_id"], "```yaml\nConfiguration Saved:\n  File: ui_config.json\n  Status: ✓ Success```")
+                msg = ctx["api"].send_message(ctx["channel_id"], "```yaml\nConfiguration Saved:\n  File: ui_config.json\n  Status: â Success```")
             except:
-                msg = ctx["api"].send_message(ctx["channel_id"], "```yaml\nSave Failed:\n  Status: ✗ Error writing file```")
+                msg = ctx["api"].send_message(ctx["channel_id"], "```yaml\nSave Failed:\n  Status: â Error writing file```")
             
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
@@ -2015,7 +2015,7 @@ Examples:
     @bot.command(name="setstatus", aliases=["customstatus"])
     def setstatus(ctx, args):
         if not args:
-            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Set Status ]\n> Please provide a status\n> Format: +setstatus [emoji,] status text\n> Example: +setstatus 🎮 Gaming now\n> Example: +setstatus <:pepe:123456789>, Custom status```")
+            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Set Status ]\n> Please provide a status\n> Format: +setstatus [emoji,] status text\n> Example: +setstatus ð® Gaming now\n> Example: +setstatus <:pepe:123456789>, Custom status```")
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
             return
@@ -2658,22 +2658,22 @@ Examples:
         
         if args[0] == "user":
             filename = backup_manager.backup_user_data()
-            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\n✓ User backup complete\nFile: {filename}```")
+            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\nâ User backup complete\nFile: {filename}```")
         
         elif args[0] == "messages" and len(args) >= 2:
             channel_id = args[1]
             limit = int(args[2]) if len(args) >= 3 else 1000
             filename = backup_manager.backup_messages(channel_id, limit)
-            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\n✓ Message backup complete\nFile: {filename}\nMessages: {limit}```")
+            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\nâ Message backup complete\nFile: {filename}\nMessages: {limit}```")
         
         elif args[0] == "full":
             filename = backup_manager.create_full_backup()
-            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\n✓ Full backup complete\nFile: {filename}```")
+            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\nâ Full backup complete\nFile: {filename}```")
         
         elif args[0] == "list":
             backups = backup_manager.list_backups()
             if backups:
-                backup_list = "\n".join([f"• {b['name']} ({b['size']//1024}KB)" for b in backups[:10]])
+                backup_list = "\n".join([f"â¢ {b['name']} ({b['size']//1024}KB)" for b in backups[:10]])
                 msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup List ]\n{backup_list}\n\nTotal: {len(backups)} backups```")
             else:
                 msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Backup ]\nNo backups found```")
@@ -2682,9 +2682,9 @@ Examples:
             backup_name = args[1]
             success = backup_manager.restore_backup(backup_name)
             if success:
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\n✓ Restored from {backup_name}```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\nâ Restored from {backup_name}```")
             else:
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\n✗ Backup not found: {backup_name}```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Backup ]\nâ Backup not found: {backup_name}```")
         
         if 'msg' in locals() and msg:
             delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
@@ -2714,7 +2714,7 @@ Examples:
         
         guild_id = ctx["message"].get("guild_id")
         if not guild_id:
-            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Moderation ]\n✗ This command only works in servers```")
+            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Moderation ]\nâ This command only works in servers```")
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
             return
@@ -2722,38 +2722,38 @@ Examples:
         if args[0] == "kick" and len(args) >= 2:
             user_ids = args[1].split(',')
             count = mod_manager.mass_kick(guild_id, user_ids)
-            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\n✓ Kicked {count}/{len(user_ids)} users```")
+            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\nâ Kicked {count}/{len(user_ids)} users```")
         
         elif args[0] == "ban" and len(args) >= 2:
             user_ids = args[1].split(',')
             delete_days = int(args[2]) if len(args) >= 3 else 0
             count = mod_manager.mass_ban(guild_id, user_ids, delete_days)
-            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\n✓ Banned {count}/{len(user_ids)} users\nDelete days: {delete_days}```")
+            msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\nâ Banned {count}/{len(user_ids)} users\nDelete days: {delete_days}```")
         
         elif args[0] == "filter":
             if len(args) >= 3 and args[1] == "add":
                 words = args[2].split(',')
                 count = mod_manager.create_word_filter(guild_id, words)
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\n✓ Added {count} words to filter```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\nâ Added {count} words to filter```")
             elif len(args) >= 3 and args[1] == "check":
                 text = " ".join(args[2:])
                 match = mod_manager.check_message_filter(guild_id, text)
                 if match:
-                    msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\n✗ Filter matched: {match}```")
+                    msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\nâ Filter matched: {match}```")
                 else:
-                    msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Moderation ]\n✓ No filter matches```")
+                    msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Moderation ]\nâ No filter matches```")
         
         elif args[0] == "cleanup":
             if len(args) >= 2 and args[1] == "channels":
                 channels = mod_manager.get_channels(guild_id)
                 channel_ids = [c["id"] for c in channels]
                 count = mod_manager.mass_delete_channels(guild_id, channel_ids)
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\n✓ Deleted {count}/{len(channel_ids)} channels```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\nâ Deleted {count}/{len(channel_ids)} channels```")
             elif len(args) >= 2 and args[1] == "roles":
                 roles = mod_manager.get_roles(guild_id)
                 role_ids = [r["id"] for r in roles if not r.get("managed", False) and r["name"] != "@everyone"]
                 count = mod_manager.mass_delete_roles(guild_id, role_ids)
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\n✓ Deleted {count}/{len(role_ids)} roles```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Moderation ]\nâ Deleted {count}/{len(role_ids)} roles```")
         
         elif args[0] == "members":
             limit = int(args[1]) if len(args) >= 2 else 100
@@ -2781,10 +2781,10 @@ Web interface started at:
 http://127.0.0.1:8080
 
 Features:
-• Execute commands from browser
-• View bot status
-• Quick actions
-• Command history
+â¢ Execute commands from browser
+â¢ View bot status
+â¢ Quick actions
+â¢ Command history
 
 Note: Only accessible from your computer```""")
         if msg:
