@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import sys
 import subprocess
@@ -33,7 +32,6 @@ def col(t,c):
     cc = {'r':'\033[91m','g':'\033[92m','y':'\033[93m','b':'\033[94m','m':'\033[95m','c':'\033[96m','0':'\033[0m'}
     return cc.get(c,cc['c'])+t+cc['0']
 
-
 def head():
     print(col("""
  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. 
@@ -59,23 +57,24 @@ def check_py():
 
 def inst_all():
     pkgs = [
-        "curl-cffi>=0.6.0",
-        "websocket-client>=1.6.0",
-        "websockets>=11.0.0",
-        "aiohttp>=3.9.0",
-        "flask>=2.3.0",
-        "colorama>=0.4.6"
+        "curl-cffi",
+        "websocket-client",
+        "websockets",
+        "aiohttp",
+        "flask",
+        "colorama",
+        "requests",
+        "pycryptodome"
     ]
     print(col("\n[+] Installing packages:",'b'))
     for p in pkgs:
         print(col(f"  {p}",'y'),end='')
         try:
-            subprocess.check_call([sys.executable,"-m","pip","install","-q",p.split('>=')[0]], 
-                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call([sys.executable,"-m","pip","install","-q",p], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             print(col(" ✓",'g'))
         except:
             try:
-                subprocess.check_call([sys.executable,"-m","pip","install",p.split('>=')[0]])
+                subprocess.check_call([sys.executable,"-m","pip","install",p])
                 print(col(" ✓",'g'))
             except:
                 print(col(" ✗",'r'))
@@ -83,18 +82,14 @@ def inst_all():
 
 def chk_all():
     required = [
-        "main.py", "bot.py", "api_client.py", "header.py", 
-        "rate_limit.py", "cache.py", "config.py", "owner.py",
-        "nitro.py", "afk_system.py", "anti_gc_trap.py",
-        "backup.py", "moderation.py", "voice.py", "webpanel.py",
-        "error_handler.py", "data_engine.py", "analytics.py",
-        "notification.py", "host.py", "boost_manager.py",
-        "boost_commands.py"
+        "main.py", "bot.py", "api_client.py", "header.py", "rate_limit.py", "cache.py", "config.py", "owner.py",
+        "nitro.py", "afk_system.py", "anti_gc_trap.py", "backup.py", "moderation.py", "voice.py", "webpanel.py",
+        "error_handler.py", "data_engine.py", "analytics.py", "notification.py", "host.py", "boost_manager.py",
+        "boost_commands.py", "GitHub.py"
     ]
     
     optional = [
-        "requirements.txt", "runner.py", "agc_whitelist.json",
-        "afk_state.json", "boost_state.json", "analytics.json",
+        "requirements.txt", "runner.py", "agc_whitelist.json", "afk_state.json", "boost_state.json", "analytics.json",
         "wisdom_data.json", "errors.json", "alerts.json"
     ]
     
@@ -112,7 +107,7 @@ def chk_all():
         if os.path.exists(f):
             print(col(f"  • {f}",'c'))
         else:
-            print(col(f"  ○ {f}",'y'))
+            print(col(f"  ⚠ {f}",'y'))
     
     if missing_req:
         print(col(f"\n✗ Missing {len(missing_req)} required files:",'r'))
@@ -176,7 +171,7 @@ def check_data():
         if os.path.exists(f):
             print(col(f"  • {f}",'c'))
         else:
-            print(col(f"  ○ {f} (will be created)",'y'))
+            print(col(f"  ⚠ {f} (will be created)",'y'))
 
 def show_info():
     print(col("\n[+] System info:",'b'))
