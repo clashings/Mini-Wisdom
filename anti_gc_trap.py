@@ -37,7 +37,6 @@ class AntiGCTrap:
     
     def check_gc_creation(self, channel_data):
         if not self.enabled:
-            print(f"[GC TRAP] Not enabled (enabled={self.enabled})")
             return False
         
         print(f"[GC TRAP DEBUG] Checking channel data")
@@ -46,14 +45,11 @@ class AntiGCTrap:
         channel_id = channel_data.get("channel_id", "")
         
         if channel_type != 3:
-            print(f"[GC TRAP] Not a group DM (type {channel_type})")
             return False
         
         if not channel_id:
-            print("[GC TRAP] No channel ID")
             return False
         
-        print(f"[GC TRAP] Group DM detected: {channel_id}")
         
         threading.Thread(target=self._handle_gc_trap, args=(channel_data,), daemon=True).start()
         return True
@@ -232,4 +228,5 @@ class AntiGCTrap:
         return False
     
     def get_whitelist(self):
+
         return list(self.whitelist)
