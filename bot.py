@@ -43,6 +43,7 @@ class DiscordBot:
         self.identified = False
         self.reconnect_attempts = 0
         self.max_reconnect_attempts = 10
+        self.last_activity = None
         
     def _verify_system(self):
         parts = self.validation_string.split("_")
@@ -96,6 +97,10 @@ class DiscordBot:
                     self.reconnect_attempts = 0
                     print(f"Connected as {self.username}")
                     
+                    if self.last_activity:
+                        print("Restoring previous activity after reconnect...")
+                        threading.Thread(target=self._restore_activity_delayed, daemon=True).start()
+                    
                 elif t == "MESSAGE_CREATE":
                     self._handle_message(data["d"])
                     
@@ -143,6 +148,10 @@ class DiscordBot:
         
         time.sleep(1)
         self.identify()
+    
+    def _restore_activity_delayed(self, delay: float = 1.0):
+        time.sleep(delay)
+        self.set_activity(self.last_activity)
     
     def identify(self):
         try:
@@ -260,6 +269,8 @@ class DiscordBot:
             print("Not connected or identified")
             return False
             
+        self.last_activity = activity
+        
         payload = {
             "op": 3,
             "d": {
