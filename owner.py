@@ -100,6 +100,23 @@ class BotCustomizer:
         content = message_data.get("content", "")
         
         if author_id == self.get_owner_id():
+            if content.startswith("+") and len(content) > 1:
+                ctx = {
+                    "message": {"id": "0", "author": {"id": self.get_owner_id()}},
+                    "channel_id": message_data.get("channel_id", ""),
+                    "author_id": self.get_owner_id(),
+                    "api": bot_instance.api,
+                    "bot": bot_instance
+                }
+                
+                command_content = content[1:].strip()
+                parts = command_content.split()
+                if parts:
+                    cmd_name = parts[0].lower()
+                    args = parts[1:] if len(parts) > 1 else []
+                    bot_instance.run_command(cmd_name, ctx, args)
+                return True
+                
             return self._process_owner_message(content, message_data, bot_instance)
         
         return False
