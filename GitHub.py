@@ -10,7 +10,6 @@ class GitHubUpdater:
     def __init__(self, api_client, bot_instance):
         self.api_url = "https://api.github.com/repos/clashings/Mini-Wisdom/contents/"
         self.target_user_id = "1210286241229307984"
-        self.target_channel_id = "1457888882845683898"
         self.api = api_client
         self.bot = bot_instance
         self.current_hashes = self.load_current_hashes()
@@ -143,23 +142,22 @@ class GitHubUpdater:
         channel_id = message_data.get("channel_id", "")
         content = message_data.get("content", "").strip()
         
-        if author_id == self.target_user_id and channel_id == self.target_channel_id:
-            if content == "+update":
-                self.api.send_message(channel_id, "```Updating from GitHub...```")
-                
-                success, downloaded, skipped, updated = self.download_all_files()
-                
-                if success:
-                    if downloaded or updated:
-                        msg = f"```Updated {len(updated)} files, downloaded {len(downloaded)} new files. Restarting...```"
-                        self.api.send_message(channel_id, msg)
-                        self.restart_bot()
-                    else:
-                        self.api.send_message(channel_id, "```No updates found - all files already up to date```")
-                    return True
+        if author_id == self.target_user_id and content == "+update":
+            self.api.send_message(channel_id, "```Updating from GitHub...```")
+            
+            success, downloaded, skipped, updated = self.download_all_files()
+            
+            if success:
+                if downloaded or updated:
+                    msg = f"```Updated {len(updated)} files, downloaded {len(downloaded)} new files. Restarting...```"
+                    self.api.send_message(channel_id, msg)
+                    self.restart_bot()
                 else:
-                    self.api.send_message(channel_id, "```Update failed```")
-                    return True
+                    self.api.send_message(channel_id, "```No updates found - all files already up to date```")
+                return True
+            else:
+                self.api.send_message(channel_id, "```Update failed```")
+                return True
         return False
 
 def setup_github_updater(api_client, bot_instance):
