@@ -2531,31 +2531,24 @@ Example: +help all```"""
         
         if msg:
             delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"), 5)
-    
+
     @bot.command(name="vc", aliases=["voice", "joinvc"])
     def vc(ctx, args):
         if not args:
-            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Voice ]\n> Usage: +vc <channel_id>\n> For servers: +vc 1234567890\n> For DMs/GCs: Use current channel ID```")
+            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Voice ]\n> Usage: +vc <channel_id>\n> For servers: +vc 1234567890\n> For DMs/GCs: +vc <dm_channel_id>```")
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
             return
         
         channel_id = args[0]
-        guild_id = ctx["message"].get("guild_id")
-        current_channel = ctx["channel_id"]
         
         try:
-            if guild_id:
-                success = voice_manager.join_vc(channel_id, is_dm=False)
-                status = "server voice channel" if success else "failed"
-            else:
-                success = voice_manager.join_vc(current_channel, is_dm=True)
-                status = "DM/group call" if success else "failed"
+            success = voice_manager.join_vc(channel_id)
             
             if success:
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Voice ]\n> Connected to {status}\n> ID: {channel_id if guild_id else current_channel}```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Voice ]\n> Connected to voice\n> ID: {channel_id}```")
             else:
-                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Voice ]\n> Failed to connect\n> Check permissions/channel ID```")
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Voice ]\n> Failed to connect\n> Check if ID is correct (must be VOICE channel)```")
             
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
@@ -2567,14 +2560,11 @@ Example: +help all```"""
     
     @bot.command(name="vce", aliases=["leavevc", "disconnect"])
     def vce(ctx, args):
-        guild_id = ctx["message"].get("guild_id")
-        current_channel = ctx["channel_id"]
-        
         try:
-            if guild_id:
-                success = voice_manager.leave_vc(is_dm=False)
+            if args:
+                success = voice_manager.leave_vc(args[0])
             else:
-                success = voice_manager.leave_vc(current_channel, is_dm=True)
+                success = voice_manager.leave_vc()
             
             if success:
                 msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ Voice ]\n> Disconnected from voice```")
@@ -2833,3 +2823,4 @@ Note: Only accessible from your computer```""")
 if __name__ == "__main__":
 
     main()
+
