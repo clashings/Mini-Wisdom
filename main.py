@@ -723,6 +723,92 @@ Example: +massdm 1 Hello everyone!```"""
             msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ Set PFP ]\n> Error: {str(e)}```")
             if msg:
                 delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+
+    @bot.command(name="superreact", aliases=["sr"])
+    def superreact_cmd(ctx, args):
+        if len(args) >= 2:
+            target_arg, emoji = args[0], args[1]
+            target_id = super_react.parse_target_id(target_arg)
+            if target_id:
+                super_react.targets[target_id] = emoji
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ SuperReact ]\n✓ Enabled for user\nTarget: <@{target_id}>\nEmoji: {emoji}```")
+                if msg:
+                    delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+
+    @bot.command(name="superreactstop", aliases=["srstop"])
+    def superreact_stop_cmd(ctx, args):
+        if args:
+            target_id = super_react.parse_target_id(args[0])
+            if target_id in super_react.targets:
+                emoji = super_react.targets[target_id]
+                del super_react.targets[target_id]
+                msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ SuperReact ]\n✗ Disabled for user\nTarget: <@{target_id}>\nEmoji: {emoji}```")
+                if msg:
+                    delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+
+    @bot.command(name="superreactlist", aliases=["srlist"])
+    def superreact_list_cmd(ctx, args):
+        if not super_react.targets and not super_react.msr_targets and not super_react.ssr_targets:
+            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ SuperReact ]\nNo active super-reactions```")
+        else:
+            response = "```asciidoc\n[ SuperReact Status ]\n"
+            if super_react.targets:
+                response += "\nSingle SuperReactions:\n"
+                for target, emoji in super_react.targets.items():
+                    response += f"• <@{target}> → {emoji}\n"
+            
+            if super_react.msr_targets:
+                response += "\nCycle SuperReactions:\n"
+                for target, (emojis, idx) in super_react.msr_targets.items():
+                    response += f"• <@{target}> → {', '.join(emojis)} (current: {emojis[idx]})\n"
+            
+            if super_react.ssr_targets:
+                response += "\nMulti SuperReactions:\n"
+                for target, emojis in super_react.ssr_targets.items():
+                    response += f"• <@{target}> → {', '.join(emojis)}\n"
+            
+            response += "```"
+            msg = ctx["api"].send_message(ctx["channel_id"], response)
+        
+        if msg:
+            delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+
+    @bot.command(name="superreactrandom", aliases=["srrandom"])
+    def superreact_random_cmd(ctx, args):
+        if not args:
+            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ SuperReact Random ]\nUsage: +srrandom <message_id>```")
+            if msg:
+                delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+            return
+        
+        target_msg_id = args[0].strip()
+        if not target_msg_id.isdigit():
+            msg = ctx["api"].send_message(ctx["channel_id"], "```asciidoc\n[ SuperReact Random ]\nError: Invalid message ID```")
+            if msg:
+                delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+            return
+        
+        msg = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ SuperReact Random ]\nAdding super-reactions to message {target_msg_id}...```")
+        
+        added_emojis = []
+        available_emojis = super_react.emojis.copy()
+        while len(added_emojis) < 10 and available_emojis:
+            emoji = random.choice(available_emojis)
+            available_emojis.remove(emoji)
+            try:
+                super_react.send_super_reaction(ctx["channel_id"], target_msg_id, emoji)
+                added_emojis.append(emoji)
+                time.sleep(0.7)
+            except Exception as e:
+                print(f"[ERROR]: Failed to add {emoji} to {target_msg_id}: {e}")
+                break
+        
+        msg2 = ctx["api"].send_message(ctx["channel_id"], f"```asciidoc\n[ SuperReact Random ]\nComplete!\nMessage: {target_msg_id}\nAdded: {', '.join(added_emojis)}\nTotal: {len(added_emojis)}```")
+        
+        if msg:
+            delete_after_delay(ctx["api"], ctx["channel_id"], msg.get("id"))
+        if msg2:
+            delete_after_delay(ctx["api"], ctx["channel_id"], msg2.get("id"))
     
     @bot.command(name="guilds")
     def list_guilds(ctx, args):
@@ -2843,6 +2929,7 @@ Note: Only accessible from your computer```""")
 if __name__ == "__main__":
 
     main()
+
 
 
 
