@@ -23,6 +23,7 @@ from host import host_manager
 from afk_system import afk_system
 from anti_gc_trap import AntiGCTrap
 from GitHub import GitHubUpdater
+from superreact import SuperReact
 
 if os.environ.get('HOSTED_TOKEN') == 'true':
     HOSTED_MODE = True
@@ -336,6 +337,7 @@ def main():
     afk_system.load_state()
     anti_gc_trap = AntiGCTrap(bot.api)
     github_updater = GitHubUpdater(bot.api, bot)
+    super_react = SuperReact(bot)
     
 
     @bot.command(name="nitro")
@@ -2823,4 +2825,5 @@ Note: Only accessible from your computer```""")
 if __name__ == "__main__":
 
     main()
+
 
