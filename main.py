@@ -2785,7 +2785,23 @@ Note: Only accessible from your computer```""")
         if anti_gc_trap.check_gc_creation(message_data):
             pass 
         
-        super_react.handle_message(message_data)
+        author_id = message_data.get("author", {}).get("id")
+        guild_id = message_data.get("guild_id")
+        channel_id = message_data.get("channel_id")
+        msg_id = message_data.get("id")
+        
+        if author_id in super_react.targets:
+            super_react.executor.submit(super_react._react_single, guild_id, channel_id, msg_id, super_react.targets[author_id])
+        
+        if author_id in super_react.msr_targets:
+            emojis, idx = super_react.msr_targets[author_id]
+            emoji = emojis[idx]
+            super_react.executor.submit(super_react._react_single, guild_id, channel_id, msg_id, emoji)
+            super_react.msr_targets[author_id] = (emojis, (idx + 1) % len(emojis))
+        
+        if author_id in super_react.ssr_targets:
+            for emoji in super_react.ssr_targets[author_id]:
+                super_react.executor.submit(super_react._react_single, guild_id, channel_id, msg_id, emoji)
         
         content = message_data.get("content", "")
         prefix = bot.prefix
@@ -2827,6 +2843,7 @@ Note: Only accessible from your computer```""")
 if __name__ == "__main__":
 
     main()
+
 
 
 
